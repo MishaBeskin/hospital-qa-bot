@@ -28,14 +28,17 @@ export async function proxy(request: NextRequest) {
   } = await supabase.auth.getUser()
 
   const { pathname } = request.nextUrl
-  const isLoginPage = pathname === '/admin'
+  const isLoginPage = pathname === '/admin/login'
+  const isAdminRoot = pathname === '/admin'
 
-  if (isLoginPage && user) {
+  // Authenticated users don't need the login page or the bare /admin root
+  if ((isLoginPage || isAdminRoot) && user) {
     return NextResponse.redirect(new URL('/admin/qa', request.url))
   }
 
+  // Unauthenticated users can only access the login page
   if (!isLoginPage && !user) {
-    return NextResponse.redirect(new URL('/admin', request.url))
+    return NextResponse.redirect(new URL('/admin/login', request.url))
   }
 
   return supabaseResponse

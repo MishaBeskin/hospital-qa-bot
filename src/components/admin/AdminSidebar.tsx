@@ -68,7 +68,7 @@ export function AdminSidebar() {
           onClick={async () => {
             const supabase = createClient()
             await supabase.auth.signOut()
-            window.location.href = '/admin'
+            window.location.href = '/admin/login'
           }}
         >
           <LogOut className="size-4 shrink-0" />
