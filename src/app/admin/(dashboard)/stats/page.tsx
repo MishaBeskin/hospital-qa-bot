@@ -62,12 +62,12 @@ export default async function StatsPage() {
   const totalAnswered = matched + unmatched
   const matchRate = totalAnswered > 0 ? matched / totalAnswered : 0
 
-  const dailyCounts: DailyCount[] = (rawDaily ?? []).map((r) => ({
+  const dailyCounts: DailyCount[] = (rawDaily ?? []).map((r: Record<string, unknown>) => ({
     day: String(r.day),
     count: Number(r.count),
   }))
 
-  const topPairs: TopQAPairStat[] = (rawTopPairs ?? []).map((r) => ({
+  const topPairs: TopQAPairStat[] = (rawTopPairs ?? []).map((r: Record<string, unknown>) => ({
     id: String(r.id),
     question: String(r.question),
     category: r.category ? String(r.category) : null,
