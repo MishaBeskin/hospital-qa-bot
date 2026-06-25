@@ -1,6 +1,12 @@
 import { AdminQAForm } from '@/components/admin/AdminQAForm'
 
-export default function NewQAPage() {
+export default async function NewQAPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ question?: string }>
+}) {
+  const { question } = await searchParams
+
   return (
     <div className="space-y-5">
       <div>
@@ -9,7 +15,7 @@ export default function NewQAPage() {
           הוסף שאלה ותשובה מאושרת למאגר
         </p>
       </div>
-      <AdminQAForm />
+      <AdminQAForm initialQuestion={question} />
     </div>
   )
 }

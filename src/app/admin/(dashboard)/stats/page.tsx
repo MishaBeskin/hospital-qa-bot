@@ -1,73 +1,105 @@
-import { StatsCards } from '@/components/admin/StatsCards'
-import type { StatsOverview, TopQAPair, UnansweredQuestion } from '@/types'
+import { createAdminClient } from '@/lib/supabase/admin'
+import { OverviewCards, TopQATable } from '@/components/admin/StatsCards'
+import { DailyChart } from '@/components/admin/DailyChart'
+import { UnansweredList } from '@/components/admin/UnansweredList'
+import type { DailyCount, TopQAPairStat, UnansweredQuestion } from '@/types'
 
-// Mock data — replace with Supabase aggregation query
-const MOCK_OVERVIEW: StatsOverview = {
-  total_messages: 342,
-  matched_messages: 298,
-  unmatched_messages: 44,
-  match_rate: 298 / 342,
-}
+export default async function StatsPage() {
+  const admin = createAdminClient()
 
-const MOCK_TOP_PAIRS: TopQAPair[] = [
-  {
-    qa_pair: {
-      id: '1',
-      question: 'כמה ימי חופשה מגיעים לי בשנה?',
-      answer: '',
-      category: 'חופשות',
-      is_active: true,
-      created_at: '',
-      updated_at: '',
-    },
-    hit_count: 87,
-  },
-  {
-    qa_pair: {
-      id: '3',
-      question: 'מה שעות העבודה הרגילות?',
-      answer: '',
-      category: 'נוכחות',
-      is_active: true,
-      created_at: '',
-      updated_at: '',
-    },
-    hit_count: 64,
-  },
-  {
-    qa_pair: {
-      id: '2',
-      question: 'איך אני מגיש בקשה לחופשת מחלה?',
-      answer: '',
-      category: 'מחלה',
-      is_active: true,
-      created_at: '',
-      updated_at: '',
-    },
-    hit_count: 51,
-  },
-]
+  // Week start = this Sunday (Israeli work week)
+  const now = new Date()
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString()
+  const weekStart = new Date(now)
+  weekStart.setDate(now.getDate() - now.getDay())
+  weekStart.setHours(0, 0, 0, 0)
 
-const MOCK_UNANSWERED: UnansweredQuestion[] = [
-  { id: 'u1', question: 'האם יש קרן השתלמות לעובדים?', session_id: 's1', created_at: new Date(Date.now() - 3_600_000).toISOString() },
-  { id: 'u2', question: 'מה קורה עם ימי חופשה שלא נוצלו בסוף שנה?', session_id: 's2', created_at: new Date(Date.now() - 86_400_000).toISOString() },
-  { id: 'u3', question: 'איך פותחים תלוש שכר ישן?', session_id: 's3', created_at: new Date(Date.now() - 172_800_000).toISOString() },
-]
+  const [
+    { count: totalAll },
+    { count: totalThisWeek },
+    { count: totalToday },
+    { count: totalMatched },
+    { count: totalUnmatched },
+    { data: rawDaily },
+    { data: rawTopPairs },
+    { data: rawUnanswered },
+  ] = await Promise.all([
+    admin
+      .from('chat_messages')
+      .select('*', { count: 'exact', head: true })
+      .eq('role', 'user'),
+    admin
+      .from('chat_messages')
+      .select('*', { count: 'exact', head: true })
+      .eq('role', 'user')
+      .gte('created_at', weekStart.toISOString()),
+    admin
+      .from('chat_messages')
+      .select('*', { count: 'exact', head: true })
+      .eq('role', 'user')
+      .gte('created_at', todayStart),
+    admin
+      .from('chat_messages')
+      .select('*', { count: 'exact', head: true })
+      .eq('role', 'assistant')
+      .not('matched_qa_id', 'is', null),
+    admin
+      .from('chat_messages')
+      .select('*', { count: 'exact', head: true })
+      .eq('role', 'assistant')
+      .is('matched_qa_id', null),
+    admin.rpc('get_daily_message_counts', { days_back: 30 }),
+    admin.rpc('get_top_qa_pairs', { limit_n: 10 }),
+    admin
+      .from('unanswered_questions')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(50),
+  ])
 
-export default function StatsPage() {
+  const matched = totalMatched ?? 0
+  const unmatched = totalUnmatched ?? 0
+  const totalAnswered = matched + unmatched
+  const matchRate = totalAnswered > 0 ? matched / totalAnswered : 0
+
+  const dailyCounts: DailyCount[] = (rawDaily ?? []).map((r) => ({
+    day: String(r.day),
+    count: Number(r.count),
+  }))
+
+  const topPairs: TopQAPairStat[] = (rawTopPairs ?? []).map((r) => ({
+    id: String(r.id),
+    question: String(r.question),
+    category: r.category ? String(r.category) : null,
+    is_active: Boolean(r.is_active),
+    hit_count: Number(r.hit_count),
+  }))
+
+  const unanswered: UnansweredQuestion[] = (rawUnanswered ?? []) as UnansweredQuestion[]
+
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       <div>
         <h1 className="text-xl font-bold tracking-tight">סטטיסטיקות</h1>
         <p className="text-sm text-muted-foreground mt-0.5">
           סקירת פעילות מערכת השאלות והתשובות
         </p>
       </div>
-      <StatsCards
-        overview={MOCK_OVERVIEW}
-        topPairs={MOCK_TOP_PAIRS}
-        recentUnanswered={MOCK_UNANSWERED}
+
+      <OverviewCards
+        totalAll={totalAll ?? 0}
+        totalThisWeek={totalThisWeek ?? 0}
+        totalToday={totalToday ?? 0}
+        matched={matched}
+        unmatched={unmatched}
+        matchRate={matchRate}
       />
+
+      <DailyChart data={dailyCounts} />
+
+      <TopQATable pairs={topPairs} />
+
+      <UnansweredList items={unanswered} />
     </div>
   )
 }

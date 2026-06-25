@@ -15,13 +15,15 @@ import type { QAPairWithMedia } from '@/types'
 
 interface AdminQAFormProps {
   initialData?: QAPairWithMedia
+  /** Pre-fill the question field — used when creating a Q&A from an unanswered question */
+  initialQuestion?: string
 }
 
-export function AdminQAForm({ initialData }: AdminQAFormProps) {
+export function AdminQAForm({ initialData, initialQuestion }: AdminQAFormProps) {
   const router = useRouter()
   const isEditing = !!initialData
 
-  const [question, setQuestion] = useState(initialData?.question ?? '')
+  const [question, setQuestion] = useState(initialData?.question ?? initialQuestion ?? '')
   const [answer, setAnswer] = useState(initialData?.answer ?? '')
   const [category, setCategory] = useState(initialData?.category ?? '')
   const [isActive, setIsActive] = useState(initialData?.is_active ?? true)

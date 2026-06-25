@@ -49,3 +49,16 @@ export interface TopQAPair {
   qa_pair: QAPair
   hit_count: number
 }
+
+export interface DailyCount {
+  day: string   // 'YYYY-MM-DD'
+  count: number
+}
+
+export interface TopQAPairStat {
+  id: string
+  question: string
+  category: string | null
+  is_active: boolean
+  hit_count: number
+}
