@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, type KeyboardEvent } from 'react'
+import { useState, useRef, type KeyboardEvent, type ChangeEvent } from 'react'
 import { SendHorizonal } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
@@ -10,16 +10,31 @@ interface ChatInputProps {
   disabled?: boolean
 }
 
+const MAX_HEIGHT = 144 // ~6 lines
+
 export function ChatInput({ onSend, disabled }: ChatInputProps) {
   const [value, setValue] = useState('')
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+
+  function resize(el: HTMLTextAreaElement) {
+    el.style.height = 'auto'
+    el.style.height = `${Math.min(el.scrollHeight, MAX_HEIGHT)}px`
+  }
+
+  function handleChange(e: ChangeEvent<HTMLTextAreaElement>) {
+    setValue(e.target.value)
+    resize(e.target)
+  }
 
   function handleSend() {
     const trimmed = value.trim()
     if (!trimmed || disabled) return
     onSend(trimmed)
     setValue('')
-    textareaRef.current?.focus()
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto'
+      textareaRef.current.focus()
+    }
   }
 
   function handleKeyDown(e: KeyboardEvent<HTMLTextAreaElement>) {
@@ -29,32 +44,37 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
     }
   }
 
+  const canSend = !!value.trim() && !disabled
+
   return (
-    <div className="border-t border-border bg-background p-3 sm:p-4">
+    <div className="border-t border-border bg-background px-3 py-3 sm:px-4 sm:py-4">
       <div className="flex items-end gap-2 max-w-3xl mx-auto">
+        {/* Send button — placed first in DOM; visually appears on left in RTL */}
         <Button
           size="icon"
           onClick={handleSend}
-          disabled={disabled || !value.trim()}
-          className="shrink-0 size-10 rounded-full"
-          aria-label="שלח"
+          disabled={!canSend}
+          className="shrink-0 size-10 rounded-full transition-opacity"
+          aria-label="שלח הודעה"
         >
           <SendHorizonal className="size-4" />
         </Button>
+
         <Textarea
           ref={textareaRef}
           value={value}
-          onChange={(e) => setValue(e.target.value)}
+          onChange={handleChange}
           onKeyDown={handleKeyDown}
           placeholder="כתוב את שאלתך כאן..."
           disabled={disabled}
           rows={1}
-          className="resize-none min-h-10 max-h-36 flex-1 rounded-2xl leading-relaxed"
-          style={{ overflowY: value.split('\n').length > 3 ? 'auto' : 'hidden' }}
+          className="flex-1 resize-none rounded-2xl leading-relaxed min-h-10 overflow-hidden transition-[height]"
+          style={{ maxHeight: MAX_HEIGHT }}
+          aria-label="הודעה"
         />
       </div>
-      <p className="text-center text-xs text-muted-foreground mt-2">
-        לחץ Enter לשליחה • Shift+Enter לשורה חדשה
+      <p className="text-center text-xs text-muted-foreground/60 mt-2">
+        Enter לשליחה &nbsp;·&nbsp; Shift+Enter לשורה חדשה
       </p>
     </div>
   )

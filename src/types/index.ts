@@ -25,6 +25,7 @@ export interface ChatMessage {
   id: string
   role: 'user' | 'assistant'
   content: string
+  created_at?: string
   matched_qa_id?: string | null
   similarity_score?: number | null
   media?: QAMedia[]
