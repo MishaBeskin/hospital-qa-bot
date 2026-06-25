@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Stethoscope, Eye, EyeOff } from 'lucide-react'
+import { Stethoscope, Eye, EyeOff, ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -38,7 +38,17 @@ export default function AdminLoginPage() {
 
   return (
     <div className="min-h-screen bg-secondary flex items-center justify-center p-4">
-      <Card className="w-full max-w-md shadow-lg">
+      <div className="w-full max-w-md space-y-3">
+        <button
+          type="button"
+          onClick={() => router.push('/')}
+          className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <ArrowRight className="size-4" />
+          חזרה לצ׳אט
+        </button>
+
+      <Card className="shadow-lg">
         <CardHeader className="text-center space-y-3 pb-4">
           <div className="flex justify-center">
             <div className="flex size-14 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-md">
@@ -93,7 +103,7 @@ export default function AdminLoginPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword((v) => !v)}
-                  className="absolute inset-y-0 end-0 flex items-center px-3 text-muted-foreground hover:text-foreground"
+                  className="absolute inset-y-0 start-0 flex items-center px-3 text-muted-foreground hover:text-foreground"
                   aria-label={showPassword ? 'הסתר סיסמה' : 'הצג סיסמה'}
                 >
                   {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
@@ -107,6 +117,7 @@ export default function AdminLoginPage() {
           </form>
         </CardContent>
       </Card>
+      </div>
     </div>
   )
 }

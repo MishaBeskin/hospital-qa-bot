@@ -1,7 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { Stethoscope, SquarePen } from 'lucide-react'
+import { Stethoscope, SquarePen, Settings } from 'lucide-react'
+import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { ChatWindow } from './ChatWindow'
 
@@ -27,17 +28,28 @@ export function ChatScreen() {
             </div>
           </div>
 
-          {/* New chat */}
-          <Button
-            variant="ghost"
-            size="sm"
-            className="gap-1.5 text-muted-foreground hover:text-foreground shrink-0"
-            onClick={() => setChatKey((k) => k + 1)}
-            aria-label="התחל שיחה חדשה"
-          >
-            <SquarePen className="size-4" />
-            <span className="hidden sm:inline text-sm">שיחה חדשה</span>
-          </Button>
+          <div className="flex items-center gap-1">
+            {/* New chat */}
+            <Button
+              variant="ghost"
+              size="sm"
+              className="gap-1.5 text-muted-foreground hover:text-foreground shrink-0"
+              onClick={() => setChatKey((k) => k + 1)}
+              aria-label="התחל שיחה חדשה"
+            >
+              <SquarePen className="size-4" />
+              <span className="hidden sm:inline text-sm">שיחה חדשה</span>
+            </Button>
+
+            {/* Admin link — subtle, for staff only */}
+            <Link
+              href="/admin/login"
+              className="flex items-center justify-center size-8 rounded-md text-muted-foreground/40 hover:text-muted-foreground transition-colors"
+              aria-label="כניסת מנהל"
+            >
+              <Settings className="size-4" />
+            </Link>
+          </div>
         </div>
       </header>
 

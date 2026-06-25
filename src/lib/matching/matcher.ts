@@ -4,7 +4,8 @@ import type { QAPair, QAMedia } from '@/types'
 
 // ── Constants ────────────────────────────────────────────────────────────────
 
-export const DEFAULT_SIMILARITY_THRESHOLD = 0.75
+export const DEFAULT_SIMILARITY_THRESHOLD =
+  Number(process.env.SIMILARITY_THRESHOLD) || 0.75
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
