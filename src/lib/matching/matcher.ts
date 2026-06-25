@@ -66,7 +66,7 @@ export async function matchQuestion(
   const sessionId = options?.sessionId
 
   // Step 1 — embed the user question
-  const embedding = await embedText(userQuestion, 'retrieval.query')
+  const embedding = await embedText(userQuestion, 'text-matching')
 
   // Step 2 — cosine similarity search via pgvector RPC
   const admin = createAdminClient()
