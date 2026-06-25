@@ -8,7 +8,6 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  type TooltipProps,
 } from 'recharts'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import type { DailyCount } from '@/types'
@@ -23,7 +22,11 @@ function formatTick(dateStr: string): string {
   return `${parseInt(day)}/${parseInt(month)}`
 }
 
-function ChartTooltip({ active, payload, label }: TooltipProps<number, string>) {
+function ChartTooltip({ active, payload, label }: {
+  active?: boolean
+  payload?: Array<{ value: number }>
+  label?: string
+}) {
   if (!active || !payload?.length) return null
   const d = new Date(label + 'T12:00:00')
   return (
