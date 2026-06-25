@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import { createClient } from '@/lib/supabase/client'
 
 export default function AdminLoginPage() {
   const router = useRouter()
@@ -22,11 +23,14 @@ export default function AdminLoginPage() {
     setError(null)
     setIsLoading(true)
     try {
-      // Supabase signInWithPassword will go here
-      await new Promise((r) => setTimeout(r, 800))
+      const supabase = createClient()
+      const { error: signInError } = await supabase.auth.signInWithPassword({ email, password })
+      if (signInError) {
+        setError('כתובת אימייל או סיסמה שגויים. אנא נסה שוב.')
+        return
+      }
       router.push('/admin/qa')
-    } catch {
-      setError('כתובת אימייל או סיסמה שגויים. אנא נסה שוב.')
+      router.refresh()
     } finally {
       setIsLoading(false)
     }

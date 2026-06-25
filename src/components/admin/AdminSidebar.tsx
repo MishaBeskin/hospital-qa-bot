@@ -6,6 +6,7 @@ import { MessageSquare, BarChart3, LogOut, Stethoscope } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
+import { createClient } from '@/lib/supabase/client'
 
 const navItems = [
   { href: '/admin/qa', label: 'ניהול שאלות ותשובות', icon: MessageSquare },
@@ -64,8 +65,9 @@ export function AdminSidebar() {
         <Button
           variant="ghost"
           className="w-full justify-start gap-3 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-          onClick={() => {
-            // Supabase signOut will go here
+          onClick={async () => {
+            const supabase = createClient()
+            await supabase.auth.signOut()
             window.location.href = '/admin'
           }}
         >

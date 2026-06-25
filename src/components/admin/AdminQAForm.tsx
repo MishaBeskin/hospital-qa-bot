@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Save, X } from 'lucide-react'
+import { Save, Trash2, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -26,8 +26,13 @@ export function AdminQAForm({ initialData }: AdminQAFormProps) {
   const [category, setCategory] = useState(initialData?.category ?? '')
   const [isActive, setIsActive] = useState(initialData?.is_active ?? true)
   const [newFiles, setNewFiles] = useState<UploadedFile[]>([])
+  const [deletedMediaIds, setDeletedMediaIds] = useState<Set<string>>(new Set())
   const [isSaving, setIsSaving] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
+
+  const existingMedia = (initialData?.qa_media ?? []).filter(
+    (m) => !deletedMediaIds.has(m.id),
+  )
 
   function validate() {
     const e: Record<string, string> = {}
@@ -37,13 +42,58 @@ export function AdminQAForm({ initialData }: AdminQAFormProps) {
     return Object.keys(e).length === 0
   }
 
+  async function handleDeleteMedia(mediaId: string) {
+    const res = await fetch(`/api/admin/media/${mediaId}`, { method: 'DELETE' })
+    if (res.ok) setDeletedMediaIds((prev) => new Set([...prev, mediaId]))
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!validate()) return
     setIsSaving(true)
+
     try {
-      // API call will go here
-      await new Promise((r) => setTimeout(r, 600))
+      const payload = {
+        question: question.trim(),
+        answer: answer.trim(),
+        category: category.trim() || null,
+        is_active: isActive,
+      }
+
+      let qaId: string
+      if (isEditing) {
+        const res = await fetch(`/api/admin/qa/${initialData.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        })
+        if (!res.ok) {
+          const err = await res.json()
+          setErrors({ submit: err.error ?? 'שגיאה בשמירה' })
+          return
+        }
+        qaId = initialData.id
+      } else {
+        const res = await fetch('/api/admin/qa', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        })
+        if (!res.ok) {
+          const err = await res.json()
+          setErrors({ submit: err.error ?? 'שגיאה בשמירה' })
+          return
+        }
+        const data = await res.json()
+        qaId = data.id
+      }
+
+      for (const f of newFiles) {
+        const fd = new FormData()
+        fd.append('file', f.file)
+        await fetch(`/api/admin/qa/${qaId}/media`, { method: 'POST', body: fd })
+      }
+
       router.push('/admin/qa')
       router.refresh()
     } finally {
@@ -141,14 +191,13 @@ export function AdminQAForm({ initialData }: AdminQAFormProps) {
             <CardTitle className="text-base">קבצים מצורפים</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {/* Existing media from initialData */}
-            {isEditing && initialData.qa_media.length > 0 && (
+            {isEditing && existingMedia.length > 0 && (
               <div className="space-y-2">
                 <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
                   קבצים קיימים
                 </p>
                 <ul className="space-y-2">
-                  {initialData.qa_media.map((m) => (
+                  {existingMedia.map((m) => (
                     <li
                       key={m.id}
                       className="flex items-center gap-3 p-2 rounded-lg border border-border bg-muted/30 text-sm"
@@ -159,6 +208,16 @@ export function AdminQAForm({ initialData }: AdminQAFormProps) {
                       <span className="text-xs text-muted-foreground shrink-0">
                         {m.file_type === 'pdf' ? 'PDF' : 'תמונה'}
                       </span>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="size-7 shrink-0 text-muted-foreground hover:text-destructive"
+                        onClick={() => handleDeleteMedia(m.id)}
+                        aria-label="מחק קובץ"
+                      >
+                        <Trash2 className="size-3.5" />
+                      </Button>
                     </li>
                   ))}
                 </ul>
@@ -170,20 +229,25 @@ export function AdminQAForm({ initialData }: AdminQAFormProps) {
         </Card>
 
         {/* Actions */}
-        <div className="flex items-center gap-3 justify-start">
-          <Button type="submit" disabled={isSaving} className="gap-2">
-            <Save className="size-4" />
-            {isSaving ? 'שומר...' : isEditing ? 'עדכן שאלה' : 'צור שאלה'}
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => router.back()}
-            className="gap-2"
-          >
-            <X className="size-4" />
-            ביטול
-          </Button>
+        <div className="flex flex-col items-start gap-3">
+          <div className="flex items-center gap-3">
+            <Button type="submit" disabled={isSaving} className="gap-2">
+              <Save className="size-4" />
+              {isSaving ? 'שומר...' : isEditing ? 'עדכן שאלה' : 'צור שאלה'}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => router.back()}
+              className="gap-2"
+            >
+              <X className="size-4" />
+              ביטול
+            </Button>
+          </div>
+          {errors.submit && (
+            <p className="text-sm text-destructive">{errors.submit}</p>
+          )}
         </div>
       </div>
     </form>

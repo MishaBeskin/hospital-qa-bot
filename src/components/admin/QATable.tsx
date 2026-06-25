@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { Pencil, Trash2, Paperclip } from 'lucide-react'
+import { Pencil, Trash2, Paperclip, PowerOff, Power } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -18,9 +18,10 @@ import type { QAPairWithMedia } from '@/types'
 interface QATableProps {
   pairs: QAPairWithMedia[]
   onDelete: (id: string) => void
+  onToggle: (pair: QAPairWithMedia) => void
 }
 
-export function QATable({ pairs, onDelete }: QATableProps) {
+export function QATable({ pairs, onDelete, onToggle }: QATableProps) {
   if (!pairs.length) {
     return (
       <div className="text-center py-16 text-muted-foreground">
@@ -42,7 +43,7 @@ export function QATable({ pairs, onDelete }: QATableProps) {
             <TableHead className="hidden md:table-cell">קטגוריה</TableHead>
             <TableHead className="w-20 text-center">קבצים</TableHead>
             <TableHead className="w-20 text-center">סטטוס</TableHead>
-            <TableHead className="w-28 text-center">פעולות</TableHead>
+            <TableHead className="w-32 text-center">פעולות</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -97,6 +98,24 @@ export function QATable({ pairs, onDelete }: QATableProps) {
                   >
                     <Pencil className="size-4" />
                   </Link>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className={cn(
+                      'size-8 text-muted-foreground',
+                      pair.is_active
+                        ? 'hover:text-amber-600'
+                        : 'hover:text-green-600',
+                    )}
+                    onClick={() => onToggle(pair)}
+                    aria-label={pair.is_active ? 'השבת' : 'הפעל'}
+                  >
+                    {pair.is_active ? (
+                      <PowerOff className="size-4" />
+                    ) : (
+                      <Power className="size-4" />
+                    )}
+                  </Button>
                   <Button
                     variant="ghost"
                     size="icon"
