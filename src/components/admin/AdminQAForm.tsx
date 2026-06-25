@@ -182,6 +182,7 @@ export function AdminQAForm({ initialData, initialQuestion }: AdminQAFormProps) 
                 id="is-active"
                 checked={isActive}
                 onCheckedChange={setIsActive}
+                dir="ltr"
               />
             </div>
           </CardContent>
