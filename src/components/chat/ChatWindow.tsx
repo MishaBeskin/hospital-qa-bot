@@ -37,7 +37,7 @@ export function ChatWindow() {
         const res = await fetch('/api/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ session_id: sessionId, message: text }),
+          body: JSON.stringify({ question: text, sessionId }),
         })
         const data = await res.json()
         const assistantMessage: ChatMessage = {
