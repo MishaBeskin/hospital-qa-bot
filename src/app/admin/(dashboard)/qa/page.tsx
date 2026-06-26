@@ -118,8 +118,8 @@ export default function QAListPage() {
               ביטול
             </Button>
             <Button variant="destructive" onClick={confirmDelete} disabled={isDeleting} className="gap-2">
-              <Trash2 className="size-4" />
               {isDeleting ? 'מוחק...' : 'מחק'}
+              <Trash2 className="size-4" />
             </Button>
           </DialogFooter>
         </DialogContent>
