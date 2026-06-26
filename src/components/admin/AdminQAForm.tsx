@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { Save, Trash2, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -22,6 +22,17 @@ interface AdminQAFormProps {
 export function AdminQAForm({ initialData, initialQuestion }: AdminQAFormProps) {
   const router = useRouter()
   const isEditing = !!initialData
+
+  const redirectToLoginIfUnauthorized = useCallback(
+    (status: number) => {
+      if (status === 401) {
+        router.push('/admin/login?expired=1')
+        return true
+      }
+      return false
+    },
+    [router],
+  )
 
   const [question, setQuestion] = useState(initialData?.question ?? initialQuestion ?? '')
   const [answer, setAnswer] = useState(initialData?.answer ?? '')
@@ -46,6 +57,7 @@ export function AdminQAForm({ initialData, initialQuestion }: AdminQAFormProps) 
 
   async function handleDeleteMedia(mediaId: string) {
     const res = await fetch(`/api/admin/media/${mediaId}`, { method: 'DELETE' })
+    if (redirectToLoginIfUnauthorized(res.status)) return
     if (res.ok) setDeletedMediaIds((prev) => new Set([...prev, mediaId]))
   }
 
@@ -69,6 +81,7 @@ export function AdminQAForm({ initialData, initialQuestion }: AdminQAFormProps) 
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),
         })
+        if (redirectToLoginIfUnauthorized(res.status)) return
         if (!res.ok) {
           const err = await res.json()
           setErrors({ submit: err.error ?? 'שגיאה בשמירה' })
@@ -81,6 +94,7 @@ export function AdminQAForm({ initialData, initialQuestion }: AdminQAFormProps) 
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),
         })
+        if (redirectToLoginIfUnauthorized(res.status)) return
         if (!res.ok) {
           const err = await res.json()
           setErrors({ submit: err.error ?? 'שגיאה בשמירה' })
