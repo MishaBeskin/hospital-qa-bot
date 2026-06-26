@@ -19,7 +19,7 @@ export async function GET(_req: Request, { params }: Params) {
   const admin = createAdminClient()
   const { data, error } = await admin
     .from('qa_pairs')
-    .select('*, qa_media(*)')
+    .select('id, question, answer, category, is_active, created_at, qa_media(*)')
     .eq('id', id)
     .single()
 
@@ -65,7 +65,7 @@ export async function PUT(request: Request, { params }: Params) {
     .from('qa_pairs')
     .update(updates)
     .eq('id', id)
-    .select('*, qa_media(*)')
+    .select('id, question, answer, category, is_active, created_at, qa_media(*)')
     .single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })

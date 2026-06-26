@@ -10,7 +10,7 @@ export async function GET() {
   const admin = createAdminClient()
   const { data, error } = await admin
     .from('qa_pairs')
-    .select('*, qa_media(*)')
+    .select('id, question, answer, category, is_active, created_at, qa_media(*)')
     .order('created_at', { ascending: false })
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
@@ -40,7 +40,7 @@ export async function POST(request: Request) {
       is_active,
       embedding,
     })
-    .select('*, qa_media(*)')
+    .select('id, question, answer, category, is_active, created_at, qa_media(*)')
     .single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
