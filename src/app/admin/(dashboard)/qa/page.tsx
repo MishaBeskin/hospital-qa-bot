@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
-import { Plus, Search, Trash2, RefreshCw } from 'lucide-react'
+import { Plus, Search, Trash2 } from 'lucide-react'
 import { buttonVariants, Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { cn } from '@/lib/utils'
@@ -23,9 +23,6 @@ export default function QAListPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
-  const [isReembedding, setIsReembedding] = useState(false)
-  const [reembedResult, setReembedResult] = useState<string | null>(null)
-
   const fetchPairs = useCallback(async () => {
     try {
       const res = await fetch('/api/admin/qa')
@@ -42,22 +39,6 @@ export default function QAListPage() {
 
   function handleDelete(id: string) {
     setPendingDeleteId(id)
-  }
-
-  async function handleReembed() {
-    setIsReembedding(true)
-    setReembedResult(null)
-    try {
-      const res = await fetch('/api/admin/reembed', { method: 'POST' })
-      const data = await res.json()
-      if (res.ok) {
-        setReembedResult(`עודכנו ${data.updated} שאלות בהצלחה${data.failed ? ` (${data.failed} נכשלו)` : ''}`)
-      } else {
-        setReembedResult('שגיאה בעדכון הטמעות')
-      }
-    } finally {
-      setIsReembedding(false)
-    }
   }
 
   async function confirmDelete() {
@@ -106,25 +87,11 @@ export default function QAListPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleReembed}
-            disabled={isReembedding}
-            className="gap-2 shrink-0"
-            title="עדכן הטמעות וקטוריות לכל השאלות"
-          >
-            <RefreshCw className={cn('size-4', isReembedding && 'animate-spin')} />
-            {isReembedding ? 'מעדכן...' : 'עדכן הטמעות'}
-          </Button>
           <Link href="/admin/qa/new" className={cn(buttonVariants(), 'gap-2 shrink-0')}>
             <Plus className="size-4" />
             שאלה חדשה
           </Link>
         </div>
-        {reembedResult && (
-          <p className="text-xs text-muted-foreground w-full">{reembedResult}</p>
-        )}
       </div>
 
       <div className="relative max-w-sm">
