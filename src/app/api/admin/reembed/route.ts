@@ -11,13 +11,13 @@ export async function POST() {
 
   const { data, error } = await admin
     .from('qa_pairs')
-    .select('id, question')
+    .select('id, question, answer')
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   if (!data?.length) return NextResponse.json({ updated: 0 })
 
   const embeddings = await embedBatch(
-    data.map((r) => r.question),
+    data.map((r) => `${r.question} ${r.answer}`),
     'retrieval.passage',
   )
 

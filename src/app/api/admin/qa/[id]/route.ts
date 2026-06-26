@@ -58,7 +58,7 @@ export async function PUT(request: Request, { params }: Params) {
   }
 
   if (!existing || existing.question !== question.trim()) {
-    updates.embedding = await embedText(question.trim(), 'retrieval.passage')
+    updates.embedding = await embedText(`${question.trim()} ${answer.trim()}`, 'retrieval.passage')
   }
 
   const { data, error } = await admin
