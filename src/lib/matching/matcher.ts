@@ -40,21 +40,53 @@ function logUnansweredQuestion(question: string, sessionId?: string): void {
     })
 }
 
+function escapeLike(s: string): string {
+  return s.replace(/[%_\\]/g, '\\$&')
+}
+
+// Keyword fallback: splits the query into words and requires each to appear
+// in either the question or answer text (AND across words, OR across fields).
+async function keywordFallback(
+  userQuestion: string,
+  admin: ReturnType<typeof createAdminClient>,
+): Promise<{ qa: QAPair; media: QAMedia[] } | null> {
+  const words = userQuestion.trim().split(/\s+/).filter((w) => w.length > 1)
+  if (!words.length) return null
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let query: any = admin
+    .from('qa_pairs')
+    .select('id, question, answer, category, is_active, created_at, updated_at, qa_media(*)')
+    .eq('is_active', true)
+    .limit(1)
+
+  for (const word of words) {
+    query = query.or(`question.ilike.%${escapeLike(word)}%,answer.ilike.%${escapeLike(word)}%`)
+  }
+
+  const { data, error } = await query
+  if (error || !data?.length) return null
+
+  const row = data[0]
+  const media: QAMedia[] = (row.qa_media as QAMedia[]).sort(
+    (a, b) => a.display_order - b.display_order,
+  )
+
+  const qa: QAPair = {
+    id: row.id,
+    question: row.question,
+    answer: row.answer,
+    category: row.category,
+    is_active: row.is_active,
+    created_at: row.created_at,
+    updated_at: row.updated_at,
+  }
+
+  return { qa, media }
+}
+
 // ── Public API ────────────────────────────────────────────────────────────────
 
-/**
- * Match a user question against admin Q&A pairs using cosine similarity.
- *
- * Steps:
- *   1. Embed the question with Jina (retrieval.query task)
- *   2. Run the match_qa_pair() RPC — threshold check happens inside Postgres
- *   3. If a match is found, fetch the full QAPair row + ordered media
- *   4. If no match, log to unanswered_questions and return { qa: null }
- *
- * @param userQuestion  Raw user input string
- * @param options.sessionId   Chat session UUID — attached to unanswered_questions log
- * @param options.threshold   Override the default similarity threshold (0.75)
- */
 export async function matchQuestion(
   userQuestion: string,
   options?: {
@@ -83,16 +115,29 @@ export async function matchQuestion(
   const top: RpcRow | null = (data as RpcRow[] | null)?.[0] ?? null
 
   if (!top) {
+    // Log best available score for diagnostics
+    const { data: debugData } = await admin.rpc('match_qa_pair', {
+      query_embedding: embedding,
+      match_threshold: 0,
+      match_count: 1,
+    })
+    const best = (debugData as RpcRow[] | null)?.[0]
     console.log(
-      `[matcher] no match (threshold=${threshold}): "${userQuestion.slice(0, 80)}"`,
+      `[matcher] no vector match (threshold=${threshold}, best=${best ? best.similarity.toFixed(4) : 'none'}): "${userQuestion.slice(0, 80)}"`,
     )
+
+    // Step 3 — keyword fallback
+    const keyword = await keywordFallback(userQuestion, admin)
+    if (keyword) {
+      console.log(`[matcher] keyword fallback matched: "${userQuestion.slice(0, 60)}"`)
+      return { qa: keyword.qa, score: 0, media: keyword.media }
+    }
+
     logUnansweredQuestion(userQuestion, sessionId)
     return { qa: null, score: 0, media: [] }
   }
 
-  // Step 3 — fetch full QAPair row + attached media.
-  // The RPC only returns id/question/answer/category/similarity; we need
-  // is_active, created_at, updated_at and the media join.
+  // Step 4 — fetch full QAPair row + attached media
   const { data: pair, error: fetchError } = await admin
     .from('qa_pairs')
     .select('id, question, answer, category, is_active, created_at, updated_at, qa_media(*)')
