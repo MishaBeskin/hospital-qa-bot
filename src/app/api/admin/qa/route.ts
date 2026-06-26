@@ -28,7 +28,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'question and answer are required' }, { status: 400 })
   }
 
-  const embedding = await embedText(question.trim(), 'text-matching')
+  const embedding = await embedText(question.trim(), 'retrieval.passage')
 
   const admin = createAdminClient()
   const { data, error } = await admin

@@ -18,7 +18,7 @@ export async function POST() {
 
   const embeddings = await embedBatch(
     data.map((r) => r.question),
-    'text-matching',
+    'retrieval.passage',
   )
 
   const updates = await Promise.all(
