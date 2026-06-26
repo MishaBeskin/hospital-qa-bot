@@ -2,10 +2,18 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
-import { Plus, Search } from 'lucide-react'
-import { buttonVariants } from '@/components/ui/button'
+import { Plus, Search, Trash2 } from 'lucide-react'
+import { buttonVariants, Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { cn } from '@/lib/utils'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { QATable } from '@/components/admin/QATable'
 import type { QAPairWithMedia } from '@/types'
 
@@ -13,6 +21,8 @@ export default function QAListPage() {
   const [pairs, setPairs] = useState<QAPairWithMedia[]>([])
   const [search, setSearch] = useState('')
   const [isLoading, setIsLoading] = useState(true)
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
 
   const fetchPairs = useCallback(async () => {
     try {
@@ -28,10 +38,20 @@ export default function QAListPage() {
     fetchPairs()
   }, [fetchPairs])
 
-  async function handleDelete(id: string) {
-    if (!confirm('האם למחוק שאלה זו?')) return
-    const res = await fetch(`/api/admin/qa/${id}`, { method: 'DELETE' })
-    if (res.ok) setPairs((prev) => prev.filter((p) => p.id !== id))
+  function handleDelete(id: string) {
+    setPendingDeleteId(id)
+  }
+
+  async function confirmDelete() {
+    if (!pendingDeleteId) return
+    setIsDeleting(true)
+    try {
+      const res = await fetch(`/api/admin/qa/${pendingDeleteId}`, { method: 'DELETE' })
+      if (res.ok) setPairs((prev) => prev.filter((p) => p.id !== pendingDeleteId))
+    } finally {
+      setIsDeleting(false)
+      setPendingDeleteId(null)
+    }
   }
 
   async function handleToggle(pair: QAPairWithMedia) {
@@ -84,6 +104,26 @@ export default function QAListPage() {
       </div>
 
       <QATable pairs={filtered} onDelete={handleDelete} onToggle={handleToggle} />
+
+      <Dialog open={!!pendingDeleteId} onOpenChange={(open) => { if (!open) setPendingDeleteId(null) }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>מחיקת שאלה</DialogTitle>
+            <DialogDescription>
+              פעולה זו אינה ניתנת לביטול. השאלה והתשובה יימחקו לצמיתות.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setPendingDeleteId(null)} disabled={isDeleting}>
+              ביטול
+            </Button>
+            <Button variant="destructive" onClick={confirmDelete} disabled={isDeleting} className="gap-2">
+              <Trash2 className="size-4" />
+              {isDeleting ? 'מוחק...' : 'מחק'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
