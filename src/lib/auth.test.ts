@@ -10,8 +10,8 @@ import { createClient } from '@/lib/supabase/server'
 function makeSupabaseMock(user: object | null) {
   return {
     auth: {
-      getSession: vi.fn().mockResolvedValue({
-        data: { session: user ? { user } : null },
+      getUser: vi.fn().mockResolvedValue({
+        data: { user },
       }),
     },
   }
