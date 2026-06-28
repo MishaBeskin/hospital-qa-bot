@@ -75,7 +75,7 @@ export function QATable({ pairs, sortKey, sortDir, onSort, onDelete, onToggle }:
   }
 
   return (
-    <div className="rounded-lg border border-border overflow-auto">
+    <div className="rounded-lg border border-border overflow-auto max-h-[960px]">
       <Table>
         <TableHeader>
           <TableRow className="bg-muted/40">

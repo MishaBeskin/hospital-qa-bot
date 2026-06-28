@@ -93,7 +93,7 @@ export function UnansweredList({ items }: UnansweredListProps) {
           </div>
         ) : (
           <>
-            <div className="overflow-auto rounded-md border border-border">
+            <div className="overflow-auto max-h-[410px] rounded-md border border-border">
               <Table>
                 <TableHeader>
                   <TableRow className="bg-muted/40">
