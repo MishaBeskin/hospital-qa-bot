@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 import { AdminQAForm } from '@/components/admin/AdminQAForm'
+import { QATips } from '@/components/admin/QATips'
 import { createAdminClient } from '@/lib/supabase/admin'
 
 export default async function EditQAPage({
@@ -24,7 +25,10 @@ export default async function EditQAPage({
         <h1 className="text-xl font-bold tracking-tight">עריכת שאלה</h1>
         <p className="text-sm text-muted-foreground mt-0.5">עדכן שאלה ותשובה קיימת</p>
       </div>
-      <AdminQAForm initialData={pair} />
+      <div className="grid grid-cols-1 xl:grid-cols-[220px_1fr] gap-6 items-start">
+        <QATips />
+        <AdminQAForm initialData={pair} />
+      </div>
     </div>
   )
 }

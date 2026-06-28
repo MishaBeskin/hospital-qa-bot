@@ -1,4 +1,5 @@
 import { AdminQAForm } from '@/components/admin/AdminQAForm'
+import { QATips } from '@/components/admin/QATips'
 
 export default async function NewQAPage({
   searchParams,
@@ -15,7 +16,10 @@ export default async function NewQAPage({
           הוסף שאלה ותשובה מאושרת למאגר
         </p>
       </div>
-      <AdminQAForm initialQuestion={question} />
+      <div className="grid grid-cols-1 xl:grid-cols-[220px_1fr] gap-6 items-start">
+        <QATips />
+        <AdminQAForm initialQuestion={question} />
+      </div>
     </div>
   )
 }
