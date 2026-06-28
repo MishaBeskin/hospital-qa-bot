@@ -75,6 +75,76 @@ Embeddings are generated server-side in a Route Handler. The Jina API key lives 
 ### Testing
 Unit tests use **Vitest** only — no integration or e2e tests. Test files live alongside the code they test (`*.test.ts` / `*.test.tsx`).
 
+### Folder structure
+```
+src/
+├── app/
+│   ├── admin/
+│   │   ├── (dashboard)/        # Authenticated admin layout group
+│   │   │   ├── layout.tsx
+│   │   │   ├── qa/             # Q&A list, new, edit pages
+│   │   │   └── stats/          # Statistics dashboard
+│   │   ├── login/              # Admin login page
+│   │   └── page.tsx            # Admin redirect
+│   ├── api/
+│   │   ├── admin/              # CRUD routes (qa, media, reembed, debug-match)
+│   │   └── chat/               # RAG chat route
+│   ├── globals.css
+│   ├── layout.tsx              # Root layout — dir="rtl" lang="he"
+│   └── page.tsx                # User chat screen
+├── components/
+│   ├── admin/                  # Admin-only components
+│   ├── chat/                   # Chat UI components
+│   └── ui/                     # shadcn/ui primitives
+├── lib/
+│   ├── embeddings/jina.ts      # Jina API client
+│   ├── matching/matcher.ts     # RAG similarity + keyword fallback
+│   ├── supabase/               # admin / client / server Supabase clients
+│   ├── auth.ts                 # getAuthenticatedUser()
+│   └── utils.ts                # cn() helper
+├── proxy.ts                    # Next.js 16 proxy (was middleware.ts)
+└── types/index.ts              # Shared TypeScript types
+```
+
+## Code Style
+
+- **Exports**: Named exports for components (`export function Foo`); `export default` only for Next.js pages and layouts
+- **Props**: TypeScript `interface` (not `type`) for component props
+- **Imports**: Use `import type` for type-only imports
+- **Classnames**: Always use `cn()` from `@/lib/utils` for conditional classes
+- **Styling**: Tailwind CSS only — no inline styles. RTL-first: use logical properties (`ms-`, `me-`, `ps-`, `pe-`, `start-`, `end-`) not `ml-`/`mr-` etc.
+- **Async**: Use `async/await` — avoid `.then()` chains
+- **Server vs Client**: Mark client components with `'use client'` at the top. Keep data fetching in Server Components or Route Handlers.
+
+## Rules
+
+- **No `any` types** — use `unknown` or a specific type. Suppress only with `// eslint-disable-next-line @typescript-eslint/no-explicit-any` and a comment explaining why.
+- **No `console.log`** — use `console.error` only for actual server-side errors in Route Handlers.
+- **No unused imports** — remove them; ESLint will flag them.
+- **No magic numbers** — extract to named constants.
+- **No hallucination** — never generate, infer, or invent Q&A answers. Only return admin-created content.
+
+## Commit Convention
+
+Use **Conventional Commits**:
+
+| Prefix | When to use |
+|---|---|
+| `feat:` | New user-facing feature |
+| `fix:` | Bug fix |
+| `chore:` | Tooling, config, dependencies, non-code changes |
+| `refactor:` | Code restructure with no behavior change |
+| `style:` | Formatting, CSS, whitespace |
+| `docs:` | Documentation only |
+| `perf:` | Performance improvement |
+| `test:` | Adding or fixing tests |
+
+Always include the Co-Authored-By trailer when committing with Claude Code.
+
+## Current Focus
+
+TODO: update this each session
+
 ## Next.js 16 Breaking Changes
 
 ### Async Request APIs (fully removed sync access)

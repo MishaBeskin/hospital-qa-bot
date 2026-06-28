@@ -7,7 +7,7 @@
           {
             "type": "command",
             "shell": "powershell",
-            "command": "$json = [Console]::In.ReadToEnd() | ConvertFrom-Json; $cmd = $json.tool_input.command; if ($cmd -match 'rm\\s+-rf|DROP\\s+TABLE|DROP\\s+DATABASE|DELETE\\s+FROM|TRUNCATE\\s+TABLE') { Write-Output '{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"permissionDecision\":\"deny\",\"permissionDecisionReason\":\"Dangerous command blocked by project safety hook\"}}' }",
+            "command": "$j=[Console]::In.ReadToEnd()|ConvertFrom-Json; $c=$j.tool_input.command; $s=[regex]::Replace($c,'(?s)<<[\"\\x27]?\\w+[\"\\x27]?.*?\\n\\w+\\n',''); if($s -match 'rm\\s+-rf|DROP\\s+TABLE|DROP\\s+DATABASE|DELETE\\s+FROM\\b|TRUNCATE\\s+TABLE'){Write-Output '{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"permissionDecision\":\"deny\",\"permissionDecisionReason\":\"Dangerous command blocked by project safety hook\"}}'}",
             "statusMessage": "Checking command safety..."
           }
         ]
@@ -20,9 +20,17 @@
           {
             "type": "command",
             "shell": "powershell",
-            "command": "$json = [Console]::In.ReadToEnd() | ConvertFrom-Json; $file = $json.tool_input.file_path; if ($file -match '\\.(ts|tsx|js|jsx)$') { npx eslint $file 2>&1 }; exit 0",
+            "command": "$json = [Console]::In.ReadToEnd() | ConvertFrom-Json; $file = $json.tool_input.file_path; if ($file -match '\\.(ts|tsx|js|jsx)$') { npx eslint --fix $file 2>&1 }; exit 0",
             "statusMessage": "Linting...",
             "timeout": 30
+          },
+          {
+            "type": "command",
+            "shell": "powershell",
+            "command": "$json = [Console]::In.ReadToEnd() | ConvertFrom-Json; $file = $json.tool_input.file_path; if ($file -match '\\.(ts|tsx)$') { npx tsc --noEmit 2>&1 }; exit 0",
+            "statusMessage": "Type-checking...",
+            "timeout": 60,
+            "async": true
           },
           {
             "type": "command",
