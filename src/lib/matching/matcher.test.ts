@@ -68,6 +68,7 @@ function makeSupabaseMock(config: {
         select: vi.fn().mockReturnThis(),
         eq: vi.fn().mockReturnThis(),
         or: vi.fn().mockReturnThis(),
+        ilike: vi.fn().mockReturnThis(),
         limit: vi.fn().mockReturnThis(),
         single: vi.fn(() => Promise.resolve(result ?? { data: null, error: null })),
         insert: vi.fn(() => Promise.resolve({ error: null })),

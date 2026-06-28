@@ -28,16 +28,29 @@ interface RpcRow {
 // ── Internal helpers ─────────────────────────────────────────────────────────
 
 // Fire-and-forget: insert into unanswered_questions without blocking the response.
+// Skips the insert when an identical (case-insensitive, whitespace-normalised) question
+// already exists so the table stays deduplicated over time.
 function logUnansweredQuestion(question: string, sessionId?: string): void {
   const admin = createAdminClient()
-  admin
-    .from('unanswered_questions')
-    .insert({ question, session_id: sessionId ?? null })
-    .then(({ error }) => {
-      if (error) {
-        console.error('[matcher] Failed to log unanswered question:', error.message)
-      }
-    })
+  const normalized = question.trim().replace(/\s+/g, ' ')
+
+  ;(async () => {
+    const { data } = await admin
+      .from('unanswered_questions')
+      .select('id')
+      .ilike('question', normalized)
+      .limit(1)
+
+    if (data?.length) return
+
+    const { error } = await admin
+      .from('unanswered_questions')
+      .insert({ question: normalized, session_id: sessionId ?? null })
+
+    if (error) {
+      console.error('[matcher] Failed to log unanswered question:', error.message)
+    }
+  })()
 }
 
 function escapeLike(s: string): string {

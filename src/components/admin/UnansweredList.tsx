@@ -2,8 +2,8 @@
 
 import { useState, useMemo } from 'react'
 import Link from 'next/link'
-import { PlusCircle, CheckCircle2, ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-react'
-import { buttonVariants } from '@/components/ui/button'
+import { PlusCircle, CheckCircle2, ChevronUp, ChevronDown, ChevronsUpDown, Trash2, CopyCheck } from 'lucide-react'
+import { buttonVariants, Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 import {
@@ -41,11 +41,13 @@ function SortIcon({ active, dir }: { active: boolean; dir: SortDir }) {
     : <ChevronDown className="size-3 ms-1 shrink-0" />
 }
 
-export function UnansweredList({ items }: UnansweredListProps) {
+export function UnansweredList({ items: initialItems }: UnansweredListProps) {
+  const [items, setItems] = useState(initialItems)
   const [sortKey, setSortKey] = useState<SortKey>('created_at')
   const [sortDir, setSortDir] = useState<SortDir>('desc')
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(10)
+  const [isDeduplicating, setIsDeduplicating] = useState(false)
 
   function toggleSort(key: SortKey) {
     if (sortKey === key) {
@@ -55,6 +57,33 @@ export function UnansweredList({ items }: UnansweredListProps) {
       setSortDir('asc')
     }
     setPage(1)
+  }
+
+  async function handleDelete(id: string) {
+    const res = await fetch(`/api/admin/unanswered/${id}`, { method: 'DELETE' })
+    if (res.ok) setItems((prev) => prev.filter((q) => q.id !== id))
+  }
+
+  async function handleDeduplicate() {
+    setIsDeduplicating(true)
+    try {
+      const res = await fetch('/api/admin/unanswered/deduplicate', { method: 'POST' })
+      if (!res.ok) return
+      const { deleted } = await res.json() as { deleted: number }
+      if (deleted > 0) {
+        // Re-fetch current list from server by removing duplicates locally
+        // (keeps UI in sync without a full page reload)
+        const seen = new Set<string>()
+        setItems((prev) => prev.filter((q) => {
+          const key = q.question.trim().toLowerCase().replace(/\s+/g, ' ')
+          if (seen.has(key)) return false
+          seen.add(key)
+          return true
+        }))
+      }
+    } finally {
+      setIsDeduplicating(false)
+    }
   }
 
   const sorted = useMemo(() => {
@@ -74,11 +103,25 @@ export function UnansweredList({ items }: UnansweredListProps) {
     <Card>
       <CardHeader>
         <div className="flex items-center justify-between gap-2">
-          <CardTitle className="text-base">שאלות ללא תשובה</CardTitle>
+          <div className="flex items-center gap-2">
+            <CardTitle className="text-base">שאלות ללא תשובה</CardTitle>
+            {items.length > 0 && (
+              <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
+                {items.length}
+              </span>
+            )}
+          </div>
           {items.length > 0 && (
-            <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
-              {items.length}
-            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-1.5 text-xs h-7"
+              onClick={handleDeduplicate}
+              disabled={isDeduplicating}
+            >
+              <CopyCheck className="size-3.5" />
+              {isDeduplicating ? 'מנקה...' : 'הסר כפולים'}
+            </Button>
           )}
         </div>
       </CardHeader>
@@ -115,7 +158,7 @@ export function UnansweredList({ items }: UnansweredListProps) {
                         <SortIcon active={sortKey === 'created_at'} dir={sortDir} />
                       </div>
                     </TableHead>
-                    <TableHead className="w-28">פעולה</TableHead>
+                    <TableHead className="w-36">פעולות</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -128,16 +171,27 @@ export function UnansweredList({ items }: UnansweredListProps) {
                         {relativeTime(q.created_at)}
                       </TableCell>
                       <TableCell>
-                        <Link
-                          href={`/admin/qa/new?question=${encodeURIComponent(q.question)}`}
-                          className={cn(
-                            buttonVariants({ variant: 'outline', size: 'sm' }),
-                            'gap-1.5 h-7 px-2.5 text-xs',
-                          )}
-                        >
-                          <PlusCircle className="size-3.5" />
-                          צור שאלה
-                        </Link>
+                        <div className="flex items-center gap-1">
+                          <Link
+                            href={`/admin/qa/new?question=${encodeURIComponent(q.question)}`}
+                            className={cn(
+                              buttonVariants({ variant: 'outline', size: 'sm' }),
+                              'gap-1.5 h-7 px-2.5 text-xs',
+                            )}
+                          >
+                            <PlusCircle className="size-3.5" />
+                            צור שאלה
+                          </Link>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="size-7 text-muted-foreground hover:text-destructive shrink-0"
+                            onClick={() => handleDelete(q.id)}
+                            aria-label="מחק שאלה"
+                          >
+                            <Trash2 className="size-3.5" />
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}
