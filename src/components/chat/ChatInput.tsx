@@ -49,17 +49,6 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
   return (
     <div className="border-t border-border bg-background px-3 py-3 sm:px-4 sm:py-4">
       <div className="flex items-end gap-2 max-w-3xl mx-auto">
-        {/* Send button — placed first in DOM; visually appears on left in RTL */}
-        <Button
-          size="icon"
-          onClick={handleSend}
-          disabled={!canSend}
-          className="shrink-0 size-10 rounded-full transition-opacity"
-          aria-label="שלח הודעה"
-        >
-          <SendHorizonal className="size-4" />
-        </Button>
-
         <Textarea
           ref={textareaRef}
           value={value}
@@ -72,6 +61,16 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
           style={{ maxHeight: MAX_HEIGHT }}
           aria-label="הודעה"
         />
+
+        <Button
+          size="icon"
+          onClick={handleSend}
+          disabled={!canSend}
+          className="shrink-0 size-10 rounded-full transition-opacity"
+          aria-label="שלח הודעה"
+        >
+          <SendHorizonal className="size-4 scale-x-[-1]" />
+        </Button>
       </div>
       <p className="text-center text-xs text-muted-foreground/60 mt-2">
         Enter לשליחה &nbsp;·&nbsp; Shift+Enter לשורה חדשה
