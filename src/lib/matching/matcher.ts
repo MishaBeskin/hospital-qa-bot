@@ -50,7 +50,11 @@ async function keywordFallback(
   userQuestion: string,
   admin: ReturnType<typeof createAdminClient>,
 ): Promise<{ qa: QAPair; media: QAMedia[] } | null> {
-  const words = userQuestion.trim().split(/\s+/).filter((w) => w.length > 1)
+  const words = userQuestion
+    .trim()
+    .split(/\s+/)
+    .map((w) => w.replace(/[^א-תa-zA-Z0-9]/g, ''))
+    .filter((w) => w.length > 1)
   if (!words.length) return null
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
