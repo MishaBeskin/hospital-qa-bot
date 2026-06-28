@@ -6,6 +6,7 @@ import { MessageSquare, BarChart3, LogOut, Stethoscope } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
+import { ThemeToggle } from '@/components/theme-toggle'
 import { createClient } from '@/lib/supabase/client'
 
 const navItems = [
@@ -60,8 +61,12 @@ export function AdminSidebar() {
 
       <Separator className="bg-sidebar-border" />
 
-      {/* Logout */}
-      <div className="px-3 py-4">
+      {/* Theme + Logout */}
+      <div className="px-3 py-4 space-y-1">
+        <div className="flex items-center justify-between px-3 py-1.5">
+          <span className="text-xs text-muted-foreground">מצב תצוגה</span>
+          <ThemeToggle />
+        </div>
         <Button
           variant="ghost"
           className="w-full justify-start gap-3 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
