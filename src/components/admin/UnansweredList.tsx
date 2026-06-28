@@ -48,6 +48,7 @@ export function UnansweredList({ items: initialItems }: UnansweredListProps) {
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(10)
   const [isDeduplicating, setIsDeduplicating] = useState(false)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
 
   function toggleSort(key: SortKey) {
     if (sortKey === key) {
@@ -60,8 +61,19 @@ export function UnansweredList({ items: initialItems }: UnansweredListProps) {
   }
 
   async function handleDelete(id: string) {
-    const res = await fetch(`/api/admin/unanswered/${id}`, { method: 'DELETE' })
-    if (res.ok) setItems((prev) => prev.filter((q) => q.id !== id))
+    setDeletingId(id)
+    try {
+      const res = await fetch(`/api/admin/unanswered/${id}`, { method: 'DELETE' })
+      if (res.ok) {
+        setItems((prev) => prev.filter((q) => q.id !== id))
+      } else {
+        const body = await res.json().catch(() => ({})) as { error?: string }
+        console.error('[UnansweredList] delete failed:', res.status, body.error)
+        alert(`מחיקה נכשלה: ${body.error ?? res.status}`)
+      }
+    } finally {
+      setDeletingId(null)
+    }
   }
 
   async function handleDeduplicate() {
@@ -136,7 +148,7 @@ export function UnansweredList({ items: initialItems }: UnansweredListProps) {
           </div>
         ) : (
           <>
-            <div className="overflow-auto max-h-[410px] rounded-md border border-border">
+            <div className="overflow-auto max-h-[540px] rounded-md border border-border">
               <Table>
                 <TableHeader>
                   <TableRow className="bg-muted/40">
@@ -187,6 +199,7 @@ export function UnansweredList({ items: initialItems }: UnansweredListProps) {
                             size="icon"
                             className="size-7 text-muted-foreground hover:text-destructive shrink-0"
                             onClick={() => handleDelete(q.id)}
+                            disabled={deletingId === q.id}
                             aria-label="מחק שאלה"
                           >
                             <Trash2 className="size-3.5" />

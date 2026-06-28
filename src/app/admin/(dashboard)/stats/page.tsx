@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { createAdminClient } from '@/lib/supabase/admin'
 import { OverviewCards, TopQATable } from '@/components/admin/StatsCards'
 import { DailyChart } from '@/components/admin/DailyChart'
