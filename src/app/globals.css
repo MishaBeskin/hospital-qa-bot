@@ -97,6 +97,9 @@
   html {
     @apply font-sans;
   }
+}
+
+@layer utilities {
   button:not(:disabled),
   [role="button"]:not(:disabled),
   a[href],
