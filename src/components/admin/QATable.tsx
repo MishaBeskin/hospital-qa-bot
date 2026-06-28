@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { Pencil, Trash2, Paperclip, PowerOff, Power } from 'lucide-react'
+import { Pencil, Trash2, Paperclip, PowerOff, Power, ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -15,13 +15,54 @@ import {
 } from '@/components/ui/table'
 import type { QAPairWithMedia } from '@/types'
 
+export type QASortKey = 'question' | 'answer' | 'category' | 'media' | 'status'
+export type SortDir = 'asc' | 'desc'
+
 interface QATableProps {
   pairs: QAPairWithMedia[]
+  sortKey: QASortKey | null
+  sortDir: SortDir
+  onSort: (key: QASortKey) => void
   onDelete: (id: string) => void
   onToggle: (pair: QAPairWithMedia) => void
 }
 
-export function QATable({ pairs, onDelete, onToggle }: QATableProps) {
+function SortIcon({ active, dir }: { active: boolean; dir: SortDir }) {
+  if (!active) return <ChevronsUpDown className="size-3 ms-1 shrink-0 opacity-40" />
+  return dir === 'asc'
+    ? <ChevronUp className="size-3 ms-1 shrink-0" />
+    : <ChevronDown className="size-3 ms-1 shrink-0" />
+}
+
+function SortHead({
+  label,
+  sortK,
+  currentKey,
+  dir,
+  onSort,
+  className,
+}: {
+  label: string
+  sortK: QASortKey
+  currentKey: QASortKey | null
+  dir: SortDir
+  onSort: (k: QASortKey) => void
+  className?: string
+}) {
+  return (
+    <TableHead
+      className={cn('cursor-pointer select-none hover:bg-muted/60 transition-colors', className)}
+      onClick={() => onSort(sortK)}
+    >
+      <div className="flex items-center">
+        {label}
+        <SortIcon active={currentKey === sortK} dir={dir} />
+      </div>
+    </TableHead>
+  )
+}
+
+export function QATable({ pairs, sortKey, sortDir, onSort, onDelete, onToggle }: QATableProps) {
   if (!pairs.length) {
     return (
       <div className="text-center py-16 text-muted-foreground">
@@ -34,15 +75,15 @@ export function QATable({ pairs, onDelete, onToggle }: QATableProps) {
   }
 
   return (
-    <div className="rounded-lg border border-border overflow-hidden">
+    <div className="rounded-lg border border-border overflow-auto">
       <Table>
         <TableHeader>
           <TableRow className="bg-muted/40">
-            <TableHead>שאלה</TableHead>
-            <TableHead className="hidden sm:table-cell">תשובה (תצוגה מקדימה)</TableHead>
-            <TableHead className="hidden md:table-cell">קטגוריה</TableHead>
-            <TableHead className="w-20 text-center">קבצים</TableHead>
-            <TableHead className="w-20 text-center">סטטוס</TableHead>
+            <SortHead label="שאלה" sortK="question" currentKey={sortKey} dir={sortDir} onSort={onSort} />
+            <SortHead label="תשובה (תצוגה מקדימה)" sortK="answer" currentKey={sortKey} dir={sortDir} onSort={onSort} className="hidden sm:table-cell" />
+            <SortHead label="קטגוריה" sortK="category" currentKey={sortKey} dir={sortDir} onSort={onSort} className="hidden md:table-cell" />
+            <SortHead label="קבצים" sortK="media" currentKey={sortKey} dir={sortDir} onSort={onSort} className="w-20 text-center" />
+            <SortHead label="סטטוס" sortK="status" currentKey={sortKey} dir={sortDir} onSort={onSort} className="w-20 text-center" />
             <TableHead className="w-32 text-center">פעולות</TableHead>
           </TableRow>
         </TableHeader>
