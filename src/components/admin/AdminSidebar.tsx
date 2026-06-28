@@ -17,7 +17,7 @@ export function AdminSidebar() {
   const pathname = usePathname()
 
   return (
-    <aside className="flex flex-col h-full w-64 bg-sidebar border-s border-sidebar-border">
+    <aside className="flex flex-col h-full w-64 bg-sidebar border-e border-sidebar-border">
       {/* Logo */}
       <div className="flex items-center gap-3 px-5 py-5">
         <div className="flex size-9 items-center justify-center rounded-lg bg-primary text-primary-foreground shrink-0">

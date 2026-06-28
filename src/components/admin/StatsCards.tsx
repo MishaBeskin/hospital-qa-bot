@@ -35,52 +35,72 @@ export function OverviewCards({
 
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* Total questions */}
       <Card>
-        <CardContent className="pt-5 pb-4">
-          <div className="inline-flex rounded-lg p-2 mb-3 bg-primary/10">
-            <MessageSquare className="size-5 text-primary" />
-          </div>
-          <p className="text-2xl font-bold tracking-tight">{fmt(totalAll)}</p>
-          <p className="text-sm text-muted-foreground mt-0.5">סה״כ שאלות</p>
-          <div className="flex gap-3 mt-2 text-xs text-muted-foreground">
-            <span>השבוע: <span className="text-foreground font-medium">{fmt(totalThisWeek)}</span></span>
-            <span>היום: <span className="text-foreground font-medium">{fmt(totalToday)}</span></span>
+        <CardContent className="p-5">
+          <div className="flex items-start justify-between gap-2">
+            <div className="min-w-0">
+              <p className="text-3xl font-bold tracking-tight leading-none">{fmt(totalAll)}</p>
+              <p className="text-sm text-muted-foreground mt-1.5">סה״כ שאלות</p>
+              <div className="flex gap-3 mt-2 text-xs text-muted-foreground">
+                <span>השבוע: <span className="text-foreground font-medium">{fmt(totalThisWeek)}</span></span>
+                <span>היום: <span className="text-foreground font-medium">{fmt(totalToday)}</span></span>
+              </div>
+            </div>
+            <div className="inline-flex rounded-xl p-2.5 bg-primary/10 shrink-0">
+              <MessageSquare className="size-5 text-primary" />
+            </div>
           </div>
         </CardContent>
       </Card>
 
+      {/* Matched */}
       <Card>
-        <CardContent className="pt-5 pb-4">
-          <div className="inline-flex rounded-lg p-2 mb-3 bg-emerald-50">
-            <CheckCircle className="size-5 text-emerald-600" />
+        <CardContent className="p-5">
+          <div className="flex items-start justify-between gap-2">
+            <div className="min-w-0">
+              <p className="text-3xl font-bold tracking-tight leading-none">{fmt(matched)}</p>
+              <p className="text-sm text-muted-foreground mt-1.5">שאלות שנענו</p>
+            </div>
+            <div className="inline-flex rounded-xl p-2.5 bg-emerald-50 shrink-0">
+              <CheckCircle className="size-5 text-emerald-600" />
+            </div>
           </div>
-          <p className="text-2xl font-bold tracking-tight">{fmt(matched)}</p>
-          <p className="text-sm text-muted-foreground mt-0.5">שאלות שנענו</p>
         </CardContent>
       </Card>
 
+      {/* Unmatched */}
       <Card>
-        <CardContent className="pt-5 pb-4">
-          <div className="inline-flex rounded-lg p-2 mb-3 bg-amber-50">
-            <XCircle className="size-5 text-amber-600" />
+        <CardContent className="p-5">
+          <div className="flex items-start justify-between gap-2">
+            <div className="min-w-0">
+              <p className="text-3xl font-bold tracking-tight leading-none">{fmt(unmatched)}</p>
+              <p className="text-sm text-muted-foreground mt-1.5">ללא תשובה</p>
+            </div>
+            <div className="inline-flex rounded-xl p-2.5 bg-amber-50 shrink-0">
+              <XCircle className="size-5 text-amber-600" />
+            </div>
           </div>
-          <p className="text-2xl font-bold tracking-tight">{fmt(unmatched)}</p>
-          <p className="text-sm text-muted-foreground mt-0.5">ללא תשובה</p>
         </CardContent>
       </Card>
 
+      {/* Match rate */}
       <Card>
-        <CardContent className="pt-5 pb-4">
-          <div className="inline-flex rounded-lg p-2 mb-3 bg-primary/10">
-            <TrendingUp className="size-5 text-primary" />
-          </div>
-          <p className="text-2xl font-bold tracking-tight">{(matchRate * 100).toFixed(1)}%</p>
-          <p className="text-sm text-muted-foreground mt-0.5">אחוז התאמה</p>
-          <div className="mt-2 h-1.5 rounded-full bg-muted overflow-hidden">
-            <div
-              className="h-full rounded-full bg-primary transition-all"
-              style={{ width: `${matchRate * 100}%` }}
-            />
+        <CardContent className="p-5">
+          <div className="flex items-start justify-between gap-2">
+            <div className="min-w-0 flex-1">
+              <p className="text-3xl font-bold tracking-tight leading-none">{(matchRate * 100).toFixed(1)}%</p>
+              <p className="text-sm text-muted-foreground mt-1.5">אחוז התאמה</p>
+              <div className="mt-2.5 h-1.5 rounded-full bg-muted overflow-hidden">
+                <div
+                  className="h-full rounded-full bg-primary transition-all"
+                  style={{ width: `${matchRate * 100}%` }}
+                />
+              </div>
+            </div>
+            <div className="inline-flex rounded-xl p-2.5 bg-primary/10 shrink-0">
+              <TrendingUp className="size-5 text-primary" />
+            </div>
           </div>
         </CardContent>
       </Card>

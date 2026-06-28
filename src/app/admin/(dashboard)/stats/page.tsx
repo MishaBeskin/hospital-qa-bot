@@ -95,9 +95,10 @@ export default async function StatsPage() {
         matchRate={matchRate}
       />
 
-      <DailyChart data={dailyCounts} />
-
-      <TopQATable pairs={topPairs} />
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+        <DailyChart data={dailyCounts} />
+        <TopQATable pairs={topPairs} />
+      </div>
 
       <UnansweredList items={unanswered} />
     </div>
