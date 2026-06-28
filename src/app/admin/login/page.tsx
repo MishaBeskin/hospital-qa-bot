@@ -2,7 +2,7 @@
 
 import { Suspense, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { Stethoscope, Eye, EyeOff, ArrowRight } from 'lucide-react'
+import { Stethoscope, Eye, EyeOff, ArrowRight, LogIn } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -40,17 +40,8 @@ function LoginForm() {
 
   return (
     <div className="min-h-screen bg-secondary flex items-center justify-center p-4">
-      <div className="w-full max-w-md space-y-3">
-        <button
-          type="button"
-          onClick={() => router.push('/')}
-          className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
-        >
-          <ArrowRight className="size-4" />
-          חזרה לצ׳אט
-        </button>
-
-      <Card className="shadow-lg">
+      <div className="space-y-4">
+      <Card className="shadow-lg w-[365px] h-[427px] flex flex-col justify-center">
         <CardHeader className="text-center space-y-3 pb-4">
           <div className="flex justify-center">
             <div className="flex size-14 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-md">
@@ -89,7 +80,7 @@ function LoginForm() {
                 autoComplete="email"
                 required
                 dir="ltr"
-                className="text-start"
+                className="text-start h-[37px]"
               />
             </div>
 
@@ -105,7 +96,7 @@ function LoginForm() {
                   autoComplete="current-password"
                   required
                   dir="ltr"
-                  className="text-start pe-10"
+                  className="text-start pe-10 h-[37px]"
                 />
                 <button
                   type="button"
@@ -118,12 +109,24 @@ function LoginForm() {
               </div>
             </div>
 
-            <Button type="submit" className="w-full" disabled={isLoading}>
+            <Button type="submit" className="w-full gap-2 h-[41px]" disabled={isLoading}>
+              {!isLoading && <LogIn className="size-4" />}
               {isLoading ? 'מתחבר...' : 'כניסה'}
             </Button>
           </form>
         </CardContent>
       </Card>
+
+        <div className="flex justify-center">
+          <button
+            type="button"
+            onClick={() => router.push('/')}
+            className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <ArrowRight className="size-4" />
+            חזרה לצ׳אט
+          </button>
+        </div>
       </div>
     </div>
   )
