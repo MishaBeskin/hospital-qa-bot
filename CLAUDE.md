@@ -41,13 +41,21 @@ npm run dev      # Start dev server (Turbopack, outputs to .next/dev)
 npm run build    # Production build (Turbopack by default)
 npm run start    # Start production server
 npm run lint     # Run ESLint directly (next lint is removed in v16)
-npx vitest       # Run unit tests
+npx vitest       # Run unit tests (watch mode)
 npx vitest run   # Run unit tests once (CI mode)
+npx playwright test            # Run e2e tests (requires dev server or auto-starts it)
+npx playwright test e2e/chat.spec.ts   # Run only chat e2e tests
+npx playwright test --ui       # Playwright UI mode (interactive)
 ```
 
 TypeScript type generation for async params/searchParams:
 ```bash
 npx next typegen
+```
+
+One-time Playwright browser install (run after cloning):
+```bash
+npx playwright install chromium
 ```
 
 ## Architecture
@@ -73,7 +81,12 @@ All UI is RTL-first. `dir="rtl" lang="he"` on root `<html>` (never override to L
 Embeddings are generated server-side in a Route Handler. The Jina API key lives in `JINA_API_KEY` (server-only, no `NEXT_PUBLIC_` prefix).
 
 ### Testing
-Unit tests use **Vitest** only — no integration or e2e tests. Test files live alongside the code they test (`*.test.ts` / `*.test.tsx`).
+
+**Unit tests — Vitest**
+Test files live alongside the source (`*.test.ts` / `*.test.tsx`). Mock external dependencies (`vi.mock`) — never hit real Supabase or Jina in unit tests.
+
+**E2e tests — Playwright**
+Test files live in `e2e/` (`*.spec.ts`). These hit the real app, real Supabase, and real Jina API. Admin tests require `E2E_ADMIN_EMAIL` and `E2E_ADMIN_PASSWORD` in `.env.local`; they skip gracefully when those vars are absent. Playwright auto-starts the dev server if port 3000 is free.
 
 ### Folder structure
 ```
