@@ -72,7 +72,7 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
           <SendHorizonal className="size-4 scale-x-[-1]" />
         </Button>
       </div>
-      <p className="text-center text-xs text-muted-foreground/60 mt-2">
+      <p className="hidden sm:block text-center text-xs text-muted-foreground/60 mt-2">
         Enter לשליחה &nbsp;·&nbsp; Shift+Enter לשורה חדשה
       </p>
     </div>

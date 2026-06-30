@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { Stethoscope, SquarePen, Settings } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
+import { ThemeToggle } from '@/components/theme-toggle'
 import { ChatWindow } from './ChatWindow'
 
 export function ChatScreen() {
@@ -40,6 +41,8 @@ export function ChatScreen() {
               <SquarePen className="size-4" />
               <span className="hidden sm:inline text-sm">שיחה חדשה</span>
             </Button>
+
+            <ThemeToggle className="text-muted-foreground/40 hover:text-muted-foreground" />
 
             {/* Admin link — subtle, for staff only */}
             <Link

@@ -14,11 +14,11 @@ const navItems = [
   { href: '/admin/stats', label: 'סטטיסטיקות', icon: BarChart3 },
 ]
 
-export function AdminSidebar() {
+export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = usePathname()
 
   return (
-    <aside className="flex flex-col h-full w-64 bg-sidebar border-e border-sidebar-border">
+    <div className="flex flex-col h-full bg-sidebar">
       {/* Logo */}
       <div className="flex items-center gap-3 px-5 py-5">
         <div className="flex size-9 items-center justify-center rounded-lg bg-primary text-primary-foreground shrink-0">
@@ -45,6 +45,7 @@ export function AdminSidebar() {
             <Link
               key={href}
               href={href}
+              onClick={onNavigate}
               className={cn(
                 'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
                 active
@@ -80,6 +81,14 @@ export function AdminSidebar() {
           התנתק
         </Button>
       </div>
+    </div>
+  )
+}
+
+export function AdminSidebar() {
+  return (
+    <aside className="hidden lg:flex flex-col h-full w-64 border-e border-sidebar-border shrink-0">
+      <SidebarContent />
     </aside>
   )
 }

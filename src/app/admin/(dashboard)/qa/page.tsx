@@ -129,19 +129,17 @@ export default function QAListPage() {
 
   return (
     <div className="space-y-5">
-      <div className="flex items-center justify-between gap-4">
-        <div>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="min-w-0">
           <h1 className="text-xl font-bold tracking-tight">שאלות ותשובות</h1>
           <p className="text-sm text-muted-foreground mt-0.5">
             {isLoading ? 'טוען...' : `${pairs.length} שאלות במאגר`}
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          <Link href="/admin/qa/new" className={cn(buttonVariants(), 'gap-2 shrink-0')}>
-            <Plus className="size-4" />
-            שאלה חדשה
-          </Link>
-        </div>
+        <Link href="/admin/qa/new" className={cn(buttonVariants(), 'gap-2 shrink-0')}>
+          <Plus className="size-4" />
+          שאלה חדשה
+        </Link>
       </div>
 
       <div className="relative max-w-sm">
